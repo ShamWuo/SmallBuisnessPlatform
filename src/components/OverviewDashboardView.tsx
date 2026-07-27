@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSalon } from '../context/SalonContext';
-import { Sparkles, ShieldAlert, MessageSquare, CloudRain, Sun, CloudLightning, ArrowRight } from 'lucide-react';
+import { MessageSquare, Sun, CloudRain, CloudLightning, ArrowRight } from 'lucide-react';
 import type { PlatformTab } from './Sidebar';
 
 interface OverviewDashboardViewProps {
@@ -14,116 +14,102 @@ export const OverviewDashboardView: React.FC<OverviewDashboardViewProps> = ({ on
   const totalLossExposure = scoredAppointments.reduce((acc, curr) => acc + curr.result.estimatedLossRisk, 0);
 
   return (
-    <div className="space-y-6">
-      {/* Top Banner & Weather Signal Controls */}
-      <div className="obsidian-card flex justify-between items-center flex-wrap gap-4">
+    <div>
+      {/* Top Banner */}
+      <div className="clean-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h2 className="text-xl font-extrabold flex items-center gap-2">
-            Salon Operations Command Center
-          </h2>
-          <p className="text-xs text-secondary mt-1">
-            Real-time no-show risk scoring & state board compliance health monitoring.
-          </p>
+          <div className="card-title" style={{ fontSize: '1rem' }}>Salon Operations Overview</div>
+          <div className="card-sub">Real-time no-show risk assessment and license compliance.</div>
         </div>
 
-        <div className="weather-sim-container">
-          <span className="weather-label">Forecast Signal:</span>
-          <div className="weather-buttons">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <span style={{ fontSize: '0.725rem', color: 'var(--text-muted)', fontWeight: 600 }}>Forecast Signal:</span>
+          <div className="weather-pill-group">
             <button
-              className={`weather-btn ${weatherSim === 'Clear' ? 'active' : ''}`}
+              className={`weather-chip ${weatherSim === 'Clear' ? 'active' : ''}`}
               onClick={() => setWeatherSim('Clear')}
             >
-              <Sun size={13} /> Clear
+              <Sun size={12} /> Clear
             </button>
             <button
-              className={`weather-btn ${weatherSim === 'Rain' ? 'active' : ''}`}
+              className={`weather-chip ${weatherSim === 'Rain' ? 'active' : ''}`}
               onClick={() => setWeatherSim('Rain')}
             >
-              <CloudRain size={13} /> Rain (+10)
+              <CloudRain size={12} /> Rain (+10)
             </button>
             <button
-              className={`weather-btn ${weatherSim === 'Thunderstorm' ? 'active' : ''}`}
+              className={`weather-chip ${weatherSim === 'Thunderstorm' ? 'active' : ''}`}
               onClick={() => setWeatherSim('Thunderstorm')}
             >
-              <CloudLightning size={13} /> Storm (+20)
+              <CloudLightning size={12} /> Storm (+20)
             </button>
           </div>
         </div>
       </div>
 
-      {/* KPI Cards Grid */}
-      <div className="grid-dashboard">
-        <div className="obsidian-card">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-xs font-bold text-tertiary uppercase">No-Show Revenue Risk</span>
-            <span className={`risk-tag ${highRisks.length > 0 ? 'high' : 'low'}`}>
-              {highRisks.length} High Risk
+      {/* Metrics Row */}
+      <div className="dashboard-metrics-grid">
+        <div className="metric-card">
+          <div className="metric-header">
+            <span className="metric-title">No-Show Revenue Exposure</span>
+            <span className={`risk-pill ${highRisks.length > 0 ? 'risk-high' : 'risk-low'}`}>
+              {highRisks.length} At Risk
             </span>
           </div>
-          <div className="text-2xl font-extrabold text-electric">${totalLossExposure}</div>
-          <div className="text-xs text-tertiary mt-1">{scoredAppointments.length} upcoming appointments analyzed</div>
+          <div className="metric-val text-blue">${totalLossExposure}</div>
+          <div className="metric-sub">{scoredAppointments.length} upcoming appointments analyzed</div>
         </div>
 
-        <div className="obsidian-card">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-xs font-bold text-tertiary uppercase">Compliance Index</span>
-            <span className={`compliance-tag ${complianceSummary.expiredCount > 0 ? 'expired' : 'good'}`}>
+        <div className="metric-card">
+          <div className="metric-header">
+            <span className="metric-title">Compliance Index</span>
+            <span className={`risk-pill ${complianceSummary.expiredCount > 0 ? 'risk-high' : 'risk-low'}`}>
               {complianceSummary.healthIndex}% Compliant
             </span>
           </div>
-          <div className="text-2xl font-extrabold">
+          <div className="metric-val">
             {complianceSummary.compliantCount}/{complianceSummary.totalItems} Verified
           </div>
-          <div className="text-xs text-tertiary mt-1">
+          <div className="metric-sub">
             {complianceSummary.expiredCount > 0 ? (
-              <span className="text-danger font-bold flex items-center gap-1">
-                <ShieldAlert size={12} /> {complianceSummary.expiredCount} expired requirement(s)!
+              <span className="text-red font-bold">
+                {complianceSummary.expiredCount} requirement(s) expired!
               </span>
             ) : (
-              'All staff licenses up to date'
+              'All licenses & logs valid'
             )}
           </div>
         </div>
-
-        <div className="obsidian-card">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-xs font-bold text-tertiary uppercase">Copilot Readiness</span>
-            <span className="copilot-tag">Single Agent Active</span>
-          </div>
-          <div className="text-2xl font-extrabold text-electric">4 Agent Tools</div>
-          <div className="text-xs text-tertiary mt-1">Score • Risks • Compliance • Drafts</div>
-        </div>
       </div>
 
-      {/* Split View: Urgent Risks + Urgent Compliance Alerts */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Split Grid */}
+      <div className="two-col-grid">
         {/* At-Risk Appointments */}
-        <div className="obsidian-card">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-sm font-bold flex items-center gap-2">
-              <Sparkles className="text-electric" size={16} /> Highest No-Show Risks
-            </h3>
-            <button className="btn-obsidian text-xs" onClick={() => onNavigate('predictor')}>
-              View Matrix <ArrowRight size={12} />
+        <div className="clean-card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
+            <div className="card-title">Highest No-Show Risks</div>
+            <button className="btn-ghost" style={{ fontSize: '0.725rem', padding: '0.25rem 0.55rem' }} onClick={() => onNavigate('predictor')}>
+              View All <ArrowRight size={12} />
             </button>
           </div>
 
-          <div className="space-y-3">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
             {highRisks.slice(0, 3).map(({ appointment: apt, result }) => (
-              <div key={apt.id} className="p-3 rounded bg-obsidian border border-subtle flex justify-between items-center">
+              <div key={apt.id} style={{ padding: '0.65rem 0.85rem', borderRadius: 'var(--radius-sm)', background: 'var(--bg-input)', border: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <div className="font-bold text-sm">{apt.clientName}</div>
-                  <div className="text-xs text-secondary">{apt.serviceName} • {apt.dayOfWeek} at {apt.appointmentTime}</div>
-                  <div className="text-xs text-electric font-semibold mt-1">Rec: {result.suggestedActionLabel}</div>
+                  <div style={{ fontWeight: 600, fontSize: '0.825rem' }}>{apt.clientName}</div>
+                  <div style={{ fontSize: '0.725rem', color: 'var(--text-muted)' }}>{apt.serviceName} • {apt.dayOfWeek} at {apt.appointmentTime}</div>
+                  <div style={{ fontSize: '0.725rem', color: 'var(--accent-blue)', fontWeight: 600, marginTop: '0.2rem' }}>Rec: {result.suggestedActionLabel}</div>
                 </div>
 
-                <div className="text-right">
-                  <span className="text-base font-extrabold text-danger">{result.score}/100</span>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontWeight: 700, color: 'var(--status-red)', fontSize: '0.9rem' }}>{result.score}/100</div>
                   <button
-                    className="btn-action-trigger mt-1 text-xs"
+                    className="btn-ghost"
+                    style={{ fontSize: '0.7rem', padding: '0.2rem 0.45rem', marginTop: '0.2rem' }}
                     onClick={() => triggerDraftAction('appointment', apt.id)}
                   >
-                    <MessageSquare size={12} /> Draft
+                    <MessageSquare size={11} /> Draft
                   </button>
                 </div>
               </div>
@@ -131,38 +117,37 @@ export const OverviewDashboardView: React.FC<OverviewDashboardViewProps> = ({ on
           </div>
         </div>
 
-        {/* Compliance Urgent Items */}
-        <div className="obsidian-card">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-sm font-bold flex items-center gap-2">
-              <ShieldAlert className="text-danger" size={16} /> Urgent Compliance Renewal Items
-            </h3>
-            <button className="btn-obsidian text-xs" onClick={() => onNavigate('compliance')}>
+        {/* Compliance Renewal Items */}
+        <div className="clean-card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
+            <div className="card-title">Urgent Compliance Renewals</div>
+            <button className="btn-ghost" style={{ fontSize: '0.725rem', padding: '0.25rem 0.55rem' }} onClick={() => onNavigate('compliance')}>
               View Hub <ArrowRight size={12} />
             </button>
           </div>
 
-          <div className="space-y-3">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
             {complianceSummary.expiringOrExpiredItems.slice(0, 3).map(item => {
               const isLicense = 'staffName' in item;
               const title = isLicense ? item.title : item.title;
               const target = isLicense ? item.staffName : item.responsibleStaff;
 
               return (
-                <div key={item.id} className="p-3 rounded bg-obsidian border border-subtle flex justify-between items-center">
+                <div key={item.id} style={{ padding: '0.65rem 0.85rem', borderRadius: 'var(--radius-sm)', background: 'var(--bg-input)', border: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <div className="font-bold text-sm">{title}</div>
-                    <div className="text-xs text-secondary">Responsible: {target}</div>
-                    <div className="text-xs text-danger font-semibold mt-1">
-                      Status: {item.status.replace('_', ' ')} ({item.daysUntilExpiry < 0 ? `${Math.abs(item.daysUntilExpiry)}d overdue` : `${item.daysUntilExpiry}d left`})
+                    <div style={{ fontWeight: 600, fontSize: '0.825rem' }}>{title}</div>
+                    <div style={{ fontSize: '0.725rem', color: 'var(--text-muted)' }}>Staff: {target}</div>
+                    <div style={{ fontSize: '0.725rem', color: 'var(--status-red)', fontWeight: 600, marginTop: '0.2rem' }}>
+                      Status: {item.status.replace('_', ' ')} ({item.daysUntilExpiry < 0 ? `${Math.abs(item.daysUntilExpiry)}d overdue` : `${item.daysUntilExpiry}d remaining`})
                     </div>
                   </div>
 
                   <button
-                    className="btn-renew-alert text-xs"
+                    className="btn-ghost"
+                    style={{ fontSize: '0.7rem', padding: '0.2rem 0.45rem', color: 'var(--status-red)' }}
                     onClick={() => triggerDraftAction('compliance', item.id)}
                   >
-                    Draft Alert
+                    Draft Notice
                   </button>
                 </div>
               );

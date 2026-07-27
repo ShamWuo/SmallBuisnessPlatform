@@ -12,7 +12,7 @@ import { SettingsView } from './components/SettingsView';
 import { ActionModal } from './components/ActionModal';
 import { NewBookingModal } from './components/NewBookingModal';
 import { NewComplianceModal } from './components/NewComplianceModal';
-import { Sparkles, CalendarPlus, ShieldCheck, Globe } from 'lucide-react';
+import { CalendarPlus, ShieldCheck, Globe } from 'lucide-react';
 
 const AppContent: React.FC = () => {
   const [activeTab, setActiveTab] = useState<PlatformTab>('landing');
@@ -26,39 +26,39 @@ const AppContent: React.FC = () => {
   }
 
   const titleMap: Record<PlatformTab, string> = {
-    landing: 'Marketing Landing Page',
-    overview: 'Executive Overview Dashboard',
+    landing: 'Landing Page',
+    overview: 'Overview Dashboard',
     predictor: 'No-Show Risk Predictor',
-    compliance: 'Compliance & License Hub',
-    copilot: 'Copilot AI Assistant Desk',
-    clients: 'Client Directory & Attendance',
-    settings: 'Salon & Model Configuration'
+    compliance: 'Compliance Hub',
+    copilot: 'Front Desk Assistant',
+    clients: 'Client Records',
+    settings: 'Settings'
   };
 
   return (
-    <div className="platform-layout">
+    <div className="app-layout">
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      <div className="main-content">
-        <header className="topbar">
-          <div className="topbar-title text-electric">
-            <Sparkles size={18} /> {titleMap[activeTab]}
+      <div className="main-wrapper">
+        <header className="clean-topbar">
+          <div className="topbar-heading">
+            {titleMap[activeTab]}
           </div>
 
           <div className="topbar-actions">
-            <button className="btn-obsidian" onClick={() => setActiveTab('landing')}>
-              <Globe size={14} /> Landing Page
+            <button className="btn-ghost" onClick={() => setActiveTab('landing')}>
+              <Globe size={13} /> Landing Page
             </button>
-            <button className="btn-obsidian" onClick={() => setIsNewComplianceOpen(true)}>
-              <ShieldCheck size={14} /> Log Cert
+            <button className="btn-ghost" onClick={() => setIsNewComplianceOpen(true)}>
+              <ShieldCheck size={13} /> Log License
             </button>
-            <button className="btn-electric" onClick={() => setIsNewBookingOpen(true)}>
-              <CalendarPlus size={14} /> + Booking Scan
+            <button className="btn-blue" onClick={() => setIsNewBookingOpen(true)}>
+              <CalendarPlus size={13} /> + Booking Risk Scan
             </button>
           </div>
         </header>
 
-        <main className="page-body">
+        <main className="page-content">
           {activeTab === 'overview' && <OverviewDashboardView onNavigate={setActiveTab} />}
           {activeTab === 'predictor' && <NoShowPredictorView />}
           {activeTab === 'compliance' && <ComplianceTrackerView />}
