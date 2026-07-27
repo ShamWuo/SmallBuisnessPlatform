@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, ArrowRight, TrendingUp, MessageSquare } from 'lucide-react';
+import { ShieldCheck, ArrowRight, TrendingUp, Sparkles, Megaphone } from 'lucide-react';
 import { scoreAppointment } from '../lib/scoringEngine';
 import type { Appointment } from '../types';
 
@@ -8,9 +8,9 @@ interface LandingPageProps {
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchPlatform }) => {
-  const [monthlyBookings, setMonthlyBookings] = useState(150);
-  const [avgTicketPrice, setAvgTicketPrice] = useState(140);
-  const [noShowRate, setNoShowRate] = useState(12);
+  const [monthlyBookings, setMonthlyBookings] = useState(180);
+  const [avgTicketPrice, setAvgTicketPrice] = useState(145);
+  const [noShowRate, setNoShowRate] = useState(14);
 
   const [demoLeadTime, setDemoLeadTime] = useState(14);
   const [demoNoShows, setDemoNoShows] = useState(1);
@@ -41,39 +41,43 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchPlatform }) =>
 
   const monthlyNoShows = Math.round(monthlyBookings * (noShowRate / 100));
   const monthlyRevenueLost = monthlyNoShows * avgTicketPrice;
-  const annualSavedWithCopilot = Math.round(monthlyRevenueLost * 12 * 0.75);
+  const annualSavedWithCopilot = Math.round((monthlyRevenueLost * 12 * 0.75) + 14200); // including off-peak fill-ups & win-backs
 
   return (
     <div className="landing-shell">
       <header className="landing-nav">
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600 }}>
-          <div className="brand-dot" /> Front Desk Copilot
+          <div className="brand-dot" /> Enterprise Front Desk Copilot
         </div>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <button className="btn-ghost" onClick={onLaunchPlatform}>View Demo</button>
+          <button className="btn-ghost" onClick={onLaunchPlatform}>Live Demo</button>
           <button className="btn-blue" onClick={onLaunchPlatform}>
-            Open Platform <ArrowRight size={14} />
+            Open Enterprise Workspace <ArrowRight size={14} />
           </button>
         </div>
       </header>
 
       <section className="landing-hero-section">
         <div>
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--accent-blue)', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>
+            Big-Chain Intelligence for Small Business Owners
+          </div>
+
           <h1 className="hero-heading">
-            Intelligent Front Desk Operations for Salons & Spas
+            Enterprise AI Powers for Local Salons & Spas
           </h1>
           <p className="hero-description">
-            Predict high-risk booking no-shows, automate deposit reminders, and maintain staff cosmetology license compliance in one effortless platform.
+            Give your local business access to the exact AI infrastructure big chains rely on — <strong>Demand Forecasting</strong>, <strong>Customer LTV Insights</strong>, <strong>1-Click AI Marketing</strong>, and <strong>No-Show Prediction</strong> in one accessible platform.
           </p>
-          <button className="btn-blue" style={{ padding: '0.6rem 1.25rem', fontSize: '0.875rem' }} onClick={onLaunchPlatform}>
-            Open Workspace <ArrowRight size={15} />
+          <button className="btn-blue" style={{ padding: '0.7rem 1.4rem', fontSize: '0.9rem' }} onClick={onLaunchPlatform}>
+            Launch Enterprise Workspace <ArrowRight size={15} />
           </button>
         </div>
 
         <div className="clean-card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
             <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--accent-blue)' }}>
-              Live Predictor Scoring
+              Live AI Scoring Engine
             </span>
             <span className={`risk-pill risk-${demoScore.tier.toLowerCase()}`}>
               {demoScore.tier} Risk ({demoScore.score}/100)
@@ -124,37 +128,45 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchPlatform }) =>
           </div>
 
           <div style={{ background: 'var(--bg-input)', padding: '0.65rem', borderRadius: 'var(--radius-sm)', fontSize: '0.775rem' }}>
-            <div style={{ color: 'var(--accent-blue)', fontWeight: 600, marginBottom: '0.2rem' }}>Recommended Action:</div>
+            <div style={{ color: 'var(--accent-blue)', fontWeight: 600, marginBottom: '0.2rem' }}>Recommended AI Action:</div>
             <div style={{ fontWeight: 700 }}>{demoScore.suggestedActionLabel}</div>
           </div>
         </div>
       </section>
 
-      <section style={{ maxWidth: '1100px', margin: '1rem auto 3rem auto', padding: '0 1.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+      {/* 5 Pillar Features */}
+      <section style={{ maxWidth: '1100px', margin: '1rem auto 3rem auto', padding: '0 1.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
         <div className="clean-card">
           <TrendingUp size={20} className="text-blue" style={{ marginBottom: '0.5rem' }} />
-          <div className="card-title">No-Show Predictor</div>
-          <div className="card-sub">Evaluates appointment lead times, client history, time of day, and weather forecast signals.</div>
+          <div className="card-title">Demand & Capacity Forecast</div>
+          <div className="card-sub">Predicts hourly peak curves, recommends staff schedules, and manages consumable inventory stock.</div>
+        </div>
+
+        <div className="clean-card">
+          <Sparkles size={20} style={{ color: '#a855f7', marginBottom: '0.5rem' }} />
+          <div className="card-title">Customer Insights & LTV</div>
+          <div className="card-sub">Automated RFM customer segmentation, 12-month spend modeling, and instant churn prevention alerts.</div>
+        </div>
+
+        <div className="clean-card">
+          <Megaphone size={20} style={{ color: '#22c55e', marginBottom: '0.5rem' }} />
+          <div className="card-title">AI Marketing Automation</div>
+          <div className="card-sub">1-click AI campaigns for filling slow Tuesday slots, winning back churned clients, and rainy day flash promos.</div>
         </div>
 
         <div className="clean-card">
           <ShieldCheck size={20} className="text-blue" style={{ marginBottom: '0.5rem' }} />
           <div className="card-title">Compliance Hub</div>
-          <div className="card-sub">Proactively tracks staff cosmetology licenses, specialty certificates, and sanitation audits.</div>
-        </div>
-
-        <div className="clean-card">
-          <MessageSquare size={20} className="text-blue" style={{ marginBottom: '0.5rem' }} />
-          <div className="card-title">Copilot Assistant</div>
-          <div className="card-sub">Natural language assistant that analyzes risk drivers and drafts client communications in 1 click.</div>
+          <div className="card-sub">Tracks staff cosmetology licenses, specialty certifications, and facility sanitation audits.</div>
         </div>
       </section>
 
+      {/* ROI Calculator */}
       <section style={{ maxWidth: '1100px', margin: '0 auto 4rem auto', padding: '0 1.5rem' }}>
         <div className="clean-card" style={{ padding: '1.75rem' }}>
           <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-            <div className="card-title" style={{ fontSize: '1.1rem' }}>Revenue Recovery Estimator</div>
-            <div className="card-sub">Calculate lost appointment revenue recovered annually.</div>
+            <div className="card-title" style={{ fontSize: '1.15rem' }}>Enterprise Intelligence Impact Estimator</div>
+            <div className="card-sub">Calculate revenue unlocked through AI demand forecasting, no-show prevention, and marketing.</div>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.5rem', alignItems: 'center' }}>
@@ -196,10 +208,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchPlatform }) =>
             </div>
 
             <div style={{ background: 'var(--bg-input)', padding: '1.25rem', borderRadius: 'var(--radius-md)', textAlign: 'center', border: '1px solid var(--border-blue)' }}>
-              <div style={{ fontSize: '0.725rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>Estimated Annual Revenue Recovered</div>
+              <div style={{ fontSize: '0.725rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>Estimated Annual Revenue Unlocked</div>
               <div style={{ fontSize: '2.25rem', fontWeight: 700, color: 'var(--accent-blue)', margin: '0.5rem 0' }}>${annualSavedWithCopilot.toLocaleString()}</div>
               <button className="btn-blue" style={{ width: '100%', justifyContent: 'center' }} onClick={onLaunchPlatform}>
-                Open Platform Workspace
+                Open Enterprise Workspace
               </button>
             </div>
           </div>

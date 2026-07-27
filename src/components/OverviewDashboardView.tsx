@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSalon } from '../context/SalonContext';
-import { MessageSquare, Sun, CloudRain, CloudLightning, ArrowRight } from 'lucide-react';
+import { MessageSquare, Sun, CloudRain, CloudLightning, ArrowRight, TrendingUp, Sparkles, Megaphone } from 'lucide-react';
 import type { PlatformTab } from './Sidebar';
 
 interface OverviewDashboardViewProps {
@@ -8,18 +8,35 @@ interface OverviewDashboardViewProps {
 }
 
 export const OverviewDashboardView: React.FC<OverviewDashboardViewProps> = ({ onNavigate }) => {
-  const { scoredAppointments, complianceSummary, weatherSim, setWeatherSim, triggerDraftAction } = useSalon();
+  const {
+    scoredAppointments,
+    complianceSummary,
+    weatherSim,
+    setWeatherSim,
+    triggerDraftAction,
+    customerInsights,
+    campaigns,
+    demandForecast
+  } = useSalon();
 
   const highRisks = scoredAppointments.filter(s => s.result.tier === 'High');
   const totalLossExposure = scoredAppointments.reduce((acc, curr) => acc + curr.result.estimatedLossRisk, 0);
+  const activeCampaigns = campaigns.filter(c => c.status === 'Active');
+  const totalCampaignRev = campaigns.reduce((sum, c) => sum + c.revenueGenerated, 0);
+  const fridayForecast = demandForecast.find(d => d.day === 'Friday');
 
   return (
-    <div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       {/* Top Banner */}
-      <div className="clean-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+      <div className="clean-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', background: 'linear-gradient(135deg, rgba(37,99,235,0.06) 0%, rgba(168,85,247,0.03) 100%)' }}>
         <div>
-          <div className="card-title" style={{ fontSize: '1rem' }}>Salon Operations Overview</div>
-          <div className="card-sub">Real-time no-show risk assessment and license compliance.</div>
+          <div style={{ fontSize: '0.725rem', fontWeight: 600, color: 'var(--accent-blue)', textTransform: 'uppercase' }}>
+            Enterprise AI Intelligence Desk
+          </div>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0.2rem 0' }}>
+            Luxe & Glow Executive Control Room
+          </h2>
+          <div className="card-sub">Combining Demand Forecasting, Customer Insights, AI Marketing, and Compliance into one workspace.</div>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
@@ -35,54 +52,105 @@ export const OverviewDashboardView: React.FC<OverviewDashboardViewProps> = ({ on
               className={`weather-chip ${weatherSim === 'Rain' ? 'active' : ''}`}
               onClick={() => setWeatherSim('Rain')}
             >
-              <CloudRain size={12} /> Rain (+10)
+              <CloudRain size={12} /> Rain (-15%)
             </button>
             <button
               className={`weather-chip ${weatherSim === 'Thunderstorm' ? 'active' : ''}`}
               onClick={() => setWeatherSim('Thunderstorm')}
             >
-              <CloudLightning size={12} /> Storm (+20)
+              <CloudLightning size={12} /> Storm (-35%)
             </button>
           </div>
         </div>
       </div>
 
-      {/* Metrics Row */}
-      <div className="dashboard-metrics-grid">
-        <div className="metric-card">
+      {/* Enterprise Metrics Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '0.85rem' }}>
+        <div className="metric-card" style={{ cursor: 'pointer' }} onClick={() => onNavigate('demand')}>
           <div className="metric-header">
-            <span className="metric-title">No-Show Revenue Exposure</span>
-            <span className={`risk-pill ${highRisks.length > 0 ? 'risk-high' : 'risk-low'}`}>
-              {highRisks.length} At Risk
+            <span className="metric-title" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+              <TrendingUp size={13} className="text-blue" /> Peak Demand
             </span>
+            <span className="menu-badge badge-blue">Friday 2-5PM</span>
           </div>
-          <div className="metric-val text-blue">${totalLossExposure}</div>
-          <div className="metric-sub">{scoredAppointments.length} upcoming appointments analyzed</div>
+          <div className="metric-val text-blue">{fridayForecast ? fridayForecast.overallDemandPct : 85}%</div>
+          <div className="metric-sub">Forecasted weekend capacity</div>
         </div>
 
-        <div className="metric-card">
+        <div className="metric-card" style={{ cursor: 'pointer' }} onClick={() => onNavigate('insights')}>
           <div className="metric-header">
-            <span className="metric-title">Compliance Index</span>
-            <span className={`risk-pill ${complianceSummary.expiredCount > 0 ? 'risk-high' : 'risk-low'}`}>
-              {complianceSummary.healthIndex}% Compliant
+            <span className="metric-title" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+              <Sparkles size={13} style={{ color: '#a855f7' }} /> At-Risk Exposure
+            </span>
+            <span className="menu-badge badge-purple">{customerInsights.totalAtRiskCount} Clients</span>
+          </div>
+          <div className="metric-val" style={{ color: '#a855f7' }}>${customerInsights.atRiskRevenueValue.toLocaleString()}</div>
+          <div className="metric-sub">Potential annual churn risk</div>
+        </div>
+
+        <div className="metric-card" style={{ cursor: 'pointer' }} onClick={() => onNavigate('marketing')}>
+          <div className="metric-header">
+            <span className="metric-title" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+              <Megaphone size={13} style={{ color: '#22c55e' }} /> AI Marketing ROI
+            </span>
+            <span className="menu-badge badge-green">{activeCampaigns.length} Active</span>
+          </div>
+          <div className="metric-val" style={{ color: '#22c55e' }}>+${totalCampaignRev.toLocaleString()}</div>
+          <div className="metric-sub">Rescued revenue from campaigns</div>
+        </div>
+
+        <div className="metric-card" style={{ cursor: 'pointer' }} onClick={() => onNavigate('predictor')}>
+          <div className="metric-header">
+            <span className="metric-title">No-Show Risk</span>
+            <span className={`risk-pill ${highRisks.length > 0 ? 'risk-high' : 'risk-low'}`}>
+              {highRisks.length} High Risk
             </span>
           </div>
-          <div className="metric-val">
-            {complianceSummary.compliantCount}/{complianceSummary.totalItems} Verified
-          </div>
-          <div className="metric-sub">
-            {complianceSummary.expiredCount > 0 ? (
-              <span className="text-red font-bold">
-                {complianceSummary.expiredCount} requirement(s) expired!
-              </span>
-            ) : (
-              'All licenses & logs valid'
-            )}
-          </div>
+          <div className="metric-val">${totalLossExposure}</div>
+          <div className="metric-sub">{scoredAppointments.length} bookings scored</div>
         </div>
       </div>
 
-      {/* Split Grid */}
+      {/* Quick Access Modules Navigation Cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+        <div className="clean-card" style={{ cursor: 'pointer', transition: 'all 0.15s ease' }} onClick={() => onNavigate('demand')}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+            <div style={{ fontWeight: 700, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <TrendingUp size={16} className="text-blue" /> Demand & Capacity Forecast
+            </div>
+            <ArrowRight size={14} className="text-blue" />
+          </div>
+          <p style={{ fontSize: '0.775rem', color: 'var(--text-muted)', margin: 0 }}>
+            7-day hourly demand heatmaps, peak capacity warnings, staff schedule optimizer, and supply reorder forecasts.
+          </p>
+        </div>
+
+        <div className="clean-card" style={{ cursor: 'pointer', transition: 'all 0.15s ease' }} onClick={() => onNavigate('insights')}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+            <div style={{ fontWeight: 700, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#a855f7' }}>
+              <Sparkles size={16} /> Customer Insights & LTV
+            </div>
+            <ArrowRight size={14} style={{ color: '#a855f7' }} />
+          </div>
+          <p style={{ fontSize: '0.775rem', color: 'var(--text-muted)', margin: 0 }}>
+            Automated RFM segmentation, 12-month client LTV predictor, churn prevention watchlist, and review sentiment analytics.
+          </p>
+        </div>
+
+        <div className="clean-card" style={{ cursor: 'pointer', transition: 'all 0.15s ease' }} onClick={() => onNavigate('marketing')}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+            <div style={{ fontWeight: 700, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#22c55e' }}>
+              <Megaphone size={16} /> Automated AI Marketing
+            </div>
+            <ArrowRight size={14} style={{ color: '#22c55e' }} />
+          </div>
+          <p style={{ fontSize: '0.775rem', color: 'var(--text-muted)', margin: 0 }}>
+            1-click off-peak slot filler campaigns, automated retention triggers, rainy day flash sales, and ROI calculators.
+          </p>
+        </div>
+      </div>
+
+      {/* Split Operations Grid */}
       <div className="two-col-grid">
         {/* At-Risk Appointments */}
         <div className="clean-card">
