@@ -36,6 +36,14 @@ import {
   createCampaignAPI,
   sendCopilotAIQueryAPI
 } from '../lib/apiClient';
+import {
+  fetchAppointmentsApi,
+  createAppointmentApi,
+  fetchComplianceApi,
+  createLicenseApi,
+  createComplianceLogApi,
+  checkBackendHealth
+} from '../services/api';
 
 interface SalonContextType {
   appointments: Appointment[];
@@ -47,14 +55,13 @@ interface SalonContextType {
   complianceSummary: ComplianceSummary;
   chatMessages: ChatMessage[];
   actionModal: ActionModalState;
+  isBackendConnected: boolean;
   closeActionModal: () => void;
   openActionModal: (modal: Omit<ActionModalState, 'isOpen'>) => void;
   sendCopilotMessage: (prompt: string) => void;
   addAppointment: (apt: Omit<Appointment, 'id' | 'clientHistory'> & { totalVisits?: number; pastNoShows?: number; pastCancellations?: number }) => void;
   triggerDraftAction: (category: 'appointment' | 'compliance', id: string) => void;
   addComplianceItem: (item: { staffId?: string; title: string; category: any; expiryDate: string; licenseNumber?: string }) => void;
-  
-  // Enterprise Intelligence Extensions
   demandForecast: DayDemandForecast[];
   staffingRecommendations: StaffingRecommendation[];
   supplyRequirements: SupplyRequirement[];
@@ -62,7 +69,7 @@ interface SalonContextType {
   customerInsights: CustomerInsightsSummary;
   campaigns: MarketingCampaign[];
   triggerRules: AutomatedTriggerRule[];
-  addCampaign: (campaign: Omit<MarketingCampaign, 'id' | 'createdAt' | 'recipientsCount' | 'conversionsCount' | 'conversionRatePct' | 'revenueGenerated' | 'campaignCost' | 'roiMultiplier'>) => void;
+  addCampaign: (campaignData: Omit<MarketingCampaign, 'id' | 'createdAt' | 'recipientsCount' | 'conversionsCount' | 'conversionRatePct' | 'revenueGenerated' | 'campaignCost' | 'roiMultiplier'>) => void;
   toggleTriggerRule: (triggerId: string) => void;
   launchQuickCampaign: (type: CampaignType, targetSegment: CustomerSegmentType | 'All', offer: string, timeSlot?: string) => void;
 }
@@ -93,7 +100,7 @@ const initialAppointments: Appointment[] = [
     clientName: 'Marcus Vance',
     clientPhone: '(555) 876-5432',
     clientEmail: 'marcus.vance@example.com',
-    serviceName: 'Men’s Executive Haircut & Beard Sculpt',
+    serviceName: "Men's Executive Haircut & Beard Sculpt",
     servicePrice: 65,
     serviceDurationMin: 45,
     appointmentDate: '2026-07-27',
@@ -292,29 +299,37 @@ export const SalonProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [healthLogs, setHealthLogs] = useState<HealthSafetyLog[]>(initialHealthLogs);
   const [weatherSim, setWeatherSim] = useState<'Clear' | 'Rain' | 'Thunderstorm'>('Clear');
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>(initialChatMessages);
-  
+  const [isBackendConnected, setIsBackendConnected] = useState<boolean>(false);
   const [customers, setCustomers] = useState<CustomerProfile[]>(INITIAL_CUSTOMERS);
   const [campaigns, setCampaigns] = useState<MarketingCampaign[]>(INITIAL_CAMPAIGNS);
   const [triggerRules, setTriggerRules] = useState<AutomatedTriggerRule[]>(INITIAL_TRIGGERS);
 
   // Sync data with Express API on mount
   useEffect(() => {
+    let isMounted = true;
     async function syncBackendData() {
-      const apiApts = await fetchAppointmentsFromAPI();
-      if (apiApts && apiApts.length > 0) setAppointments(apiApts);
+      const isOnline = await checkBackendHealth();
+      if (isMounted) setIsBackendConnected(isOnline);
+
+      const apiApts = await fetchAppointmentsFromAPI() || await fetchAppointmentsApi();
+      if (apiApts && apiApts.length > 0 && isMounted) setAppointments(apiApts);
 
       const apiStaff = await fetchStaffFromAPI();
-      if (apiStaff && apiStaff.length > 0) setStaffList(apiStaff);
+      if (apiStaff && apiStaff.length > 0 && isMounted) setStaffList(apiStaff);
+
+      const fetchedComp = await fetchComplianceApi();
+      if (fetchedComp && isMounted) {
+        if (fetchedComp.healthLogs) setHealthLogs(fetchedComp.healthLogs);
+      }
 
       const apiCust = await fetchCustomersFromAPI();
-      if (apiCust && apiCust.length > 0) setCustomers(apiCust);
+      if (apiCust && apiCust.length > 0 && isMounted) setCustomers(apiCust);
 
       const apiCmp = await fetchCampaignsFromAPI();
-      if (apiCmp && apiCmp.length > 0) setCampaigns(apiCmp);
+      if (apiCmp && apiCmp.length > 0 && isMounted) setCampaigns(apiCmp);
     }
     syncBackendData();
   }, []);
-
 
   const [actionModal, setActionModal] = useState<ActionModalState>({
     isOpen: false,
@@ -324,7 +339,6 @@ export const SalonProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     messageContent: ''
   });
 
-  // Calculated Engine Views
   const scoredAppointments = useMemo(() => {
     return appointments.map(apt => {
       const aptWithWeather = { ...apt, weatherSimulated: weatherSim };
@@ -400,10 +414,14 @@ export const SalonProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+  const addAppointment = async (newAptData: Omit<Appointment, 'id' | 'clientHistory'> & { totalVisits?: number; pastNoShows?: number; pastCancellations?: number }) => {
+    let createdOnApi: Appointment | null = null;
+    if (isBackendConnected) {
+      createdOnApi = await createAppointmentApi(newAptData);
+    }
 
-  const addAppointment = (newAptData: Omit<Appointment, 'id' | 'clientHistory'> & { totalVisits?: number; pastNoShows?: number; pastCancellations?: number }) => {
-    const newId = `APT-${100 + appointments.length + 1}`;
-    const newApt: Appointment = {
+    const newId = createdOnApi ? createdOnApi.id : `APT-${100 + appointments.length + 1}`;
+    const newApt: Appointment = createdOnApi || {
       id: newId,
       clientName: newAptData.clientName,
       clientPhone: newAptData.clientPhone || '(555) 000-1111',
@@ -428,8 +446,11 @@ export const SalonProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     createAppointmentAPI(newApt);
   };
 
-  const addComplianceItem = (itemData: { staffId?: string; title: string; category: any; expiryDate: string; licenseNumber?: string }) => {
+  const addComplianceItem = async (itemData: { staffId?: string; title: string; category: any; expiryDate: string; licenseNumber?: string }) => {
     if (itemData.staffId) {
+      if (isBackendConnected) {
+        await createLicenseApi(itemData as any);
+      }
       setStaffList(prev => prev.map(staff => {
         if (staff.id === itemData.staffId) {
           const newLic = {
@@ -449,6 +470,9 @@ export const SalonProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         return staff;
       }));
     } else {
+      if (isBackendConnected) {
+        await createComplianceLogApi({ title: itemData.title, category: itemData.category, expiryDate: itemData.expiryDate });
+      }
       const newLog: HealthSafetyLog = {
         id: `HSL-${Date.now()}`,
         title: itemData.title,
@@ -486,7 +510,6 @@ export const SalonProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     createCampaignAPI(newCampaign);
   };
 
-
   const toggleTriggerRule = (triggerId: string) => {
     setTriggerRules(prev => prev.map(t => t.id === triggerId ? { ...t, isEnabled: !t.isEnabled } : t));
   };
@@ -512,6 +535,7 @@ export const SalonProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         complianceSummary,
         chatMessages,
         actionModal,
+        isBackendConnected,
         closeActionModal,
         openActionModal,
         sendCopilotMessage,

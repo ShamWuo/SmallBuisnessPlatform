@@ -4,8 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"vite\" \"tsx server/index.ts\"",
-    "server": "tsx server/index.ts",
+    "dev": "vite",
+    "server": "node server/server.js",
+    "server:sqlite": "tsx server/index.ts",
+    "dev:all": "concurrently \"vite\" \"node server/server.js\"",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview"

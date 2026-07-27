@@ -15,7 +15,7 @@ export const Header: React.FC<HeaderProps> = ({
   activeTab,
   setActiveTab
 }) => {
-  const { scoredAppointments, complianceSummary, weatherSim, setWeatherSim } = useSalon();
+  const { scoredAppointments, complianceSummary, weatherSim, setWeatherSim, isBackendConnected } = useSalon();
 
   const highRiskCount = scoredAppointments.filter(s => s.result.tier === 'High').length;
   const totalLossExposure = scoredAppointments.reduce((acc, curr) => acc + curr.result.estimatedLossRisk, 0);
@@ -29,7 +29,10 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
           <div>
             <div className="brand-title">
-              Front Desk Copilot <span className="badge-demo">HACKATHON MVP</span>
+              Front Desk Copilot{' '}
+              <span className={`badge-demo ${isBackendConnected ? 'bg-emerald-500/20 text-emerald-400' : ''}`}>
+                {isBackendConnected ? '🟢 REST API CONNECTED' : '🟡 LOCAL OFFLINE MODE'}
+              </span>
             </div>
             <div className="brand-subtitle">Luxe & Glow Salon & Spa — AI Operations Assistant</div>
           </div>
