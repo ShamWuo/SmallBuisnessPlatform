@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSalon } from '../context/SalonContext';
-import { X, ShieldCheck } from 'lucide-react';
+import { X } from 'lucide-react';
 
 interface NewComplianceModalProps {
   isOpen: boolean;
@@ -31,31 +31,28 @@ export const NewComplianceModal: React.FC<NewComplianceModalProps> = ({ isOpen, 
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-content" onClick={e => e.stopPropagation()}>
-        <div className="modal-header">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="text-primary" size={20} />
-            <span className="modal-title">Add Compliance / License Record</span>
-          </div>
-          <button className="btn-icon" onClick={onClose}>
-            <X size={18} />
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-box" onClick={e => e.stopPropagation()}>
+        <div className="modal-head">
+          <span>Add License or Compliance Log</span>
+          <button className="btn-ghost" style={{ padding: '0.2rem 0.4rem' }} onClick={onClose}>
+            <X size={15} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="modal-body form-stacked">
-          <div className="form-group">
-            <label>Record Category:</label>
+        <form onSubmit={handleSubmit} className="modal-content-body">
+          <div className="form-field">
+            <label>Category:</label>
             <select value={category} onChange={e => setCategory(e.target.value as any)}>
-              <option value="License">Staff State Board License</option>
+              <option value="License">Staff License</option>
               <option value="Certification">Staff Specialty Certificate</option>
-              <option value="Health & Safety">Facility Health & Sanitation Log</option>
+              <option value="Health & Safety">Facility Health & Sanitation</option>
               <option value="Insurance">Business Liability Insurance</option>
             </select>
           </div>
 
           {(category === 'License' || category === 'Certification') && (
-            <div className="form-group">
+            <div className="form-field">
               <label>Staff Member:</label>
               <select value={staffId} onChange={e => setStaffId(e.target.value)}>
                 {staffList.map(s => (
@@ -65,28 +62,28 @@ export const NewComplianceModal: React.FC<NewComplianceModalProps> = ({ isOpen, 
             </div>
           )}
 
-          <div className="form-group">
+          <div className="form-field">
             <label>Title / Requirement Name:</label>
             <input
               type="text"
               required
               value={title}
               onChange={e => setTitle(e.target.value)}
-              placeholder="e.g. Master Cosmetology License"
+              placeholder="e.g. Senior Cosmetology License"
             />
           </div>
 
-          <div className="form-group">
-            <label>License / Policy Number:</label>
+          <div className="form-field">
+            <label>License or Document Reference Number:</label>
             <input
               type="text"
               value={licenseNumber}
               onChange={e => setLicenseNumber(e.target.value)}
-              placeholder="e.g. LIC-99182"
+              placeholder="e.g. COS-99482-NY"
             />
           </div>
 
-          <div className="form-group">
+          <div className="form-field">
             <label>Expiration / Renewal Date:</label>
             <input
               type="date"
@@ -96,13 +93,9 @@ export const NewComplianceModal: React.FC<NewComplianceModalProps> = ({ isOpen, 
             />
           </div>
 
-          <div className="modal-footer mt-4">
-            <button type="button" className="btn-secondary" onClick={onClose}>
-              Cancel
-            </button>
-            <button type="submit" className="btn-primary">
-              Save Record
-            </button>
+          <div className="modal-foot" style={{ padding: 0, marginTop: '1rem', background: 'transparent', border: 'none' }}>
+            <button type="button" className="btn-ghost" onClick={onClose}>Cancel</button>
+            <button type="submit" className="btn-blue">Save Record</button>
           </div>
         </form>
       </div>

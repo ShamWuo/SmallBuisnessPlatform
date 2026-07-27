@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSalon } from '../context/SalonContext';
 import type { BookingChannel } from '../types';
-import { X, Sparkles, AlertTriangle, CheckCircle } from 'lucide-react';
+import { X, AlertTriangle, CheckCircle } from 'lucide-react';
 import { scoreAppointment } from '../lib/scoringEngine';
 
 interface NewBookingModalProps {
@@ -73,29 +73,26 @@ export const NewBookingModal: React.FC<NewBookingModalProps> = ({ isOpen, onClos
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-content large" onClick={e => e.stopPropagation()}>
-        <div className="modal-header">
-          <div className="flex items-center gap-2">
-            <Sparkles className="text-accent" size={20} />
-            <span className="modal-title">Real-Time Booking Risk Analyzer</span>
-          </div>
-          <button className="btn-icon" onClick={onClose}>
-            <X size={18} />
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-box wide" onClick={e => e.stopPropagation()}>
+        <div className="modal-head">
+          <span>Booking Risk Analyzer</span>
+          <button className="btn-ghost" style={{ padding: '0.2rem 0.4rem' }} onClick={onClose}>
+            <X size={15} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="modal-body form-grid">
-          <div className="form-left">
-            <div className="form-group">
+        <form onSubmit={handleSubmit} className="modal-content-body" style={{ display: 'grid', gridTemplateColumns: '1fr 240px', gap: '1.25rem' }}>
+          <div>
+            <div className="form-field">
               <label>Client Name & Phone:</label>
-              <div className="flex gap-2">
+              <div className="flex-row">
                 <input
                   type="text"
                   required
                   value={clientName}
                   onChange={e => setClientName(e.target.value)}
-                  placeholder="e.g. Taylor Swift"
+                  placeholder="Client Name"
                   className="flex-1"
                 />
                 <input
@@ -103,14 +100,14 @@ export const NewBookingModal: React.FC<NewBookingModalProps> = ({ isOpen, onClos
                   value={clientPhone}
                   onChange={e => setClientPhone(e.target.value)}
                   placeholder="(555) 000-0000"
-                  style={{ width: '140px' }}
+                  style={{ width: '130px' }}
                 />
               </div>
             </div>
 
-            <div className="form-group">
+            <div className="form-field">
               <label>Service & Price ($):</label>
-              <div className="flex gap-2">
+              <div className="flex-row">
                 <input
                   type="text"
                   required
@@ -124,24 +121,24 @@ export const NewBookingModal: React.FC<NewBookingModalProps> = ({ isOpen, onClos
                   required
                   value={servicePrice}
                   onChange={e => setServicePrice(Number(e.target.value))}
-                  style={{ width: '90px' }}
+                  style={{ width: '80px' }}
                 />
               </div>
             </div>
 
-            <div className="form-row">
-              <div className="form-group flex-1">
+            <div className="flex-row">
+              <div className="form-field flex-1">
                 <label>Booking Channel:</label>
                 <select value={channel} onChange={e => setChannel(e.target.value as BookingChannel)}>
-                  <option value="walk-in">Walk-In (-10 Risk)</option>
-                  <option value="phone">Phone Booking (0)</option>
-                  <option value="app">Mobile App (+5 Risk)</option>
-                  <option value="third-party">3rd Party Aggregator (+16 Risk)</option>
+                  <option value="walk-in">Walk-In (-10)</option>
+                  <option value="phone">Phone (0)</option>
+                  <option value="app">Mobile App (+5)</option>
+                  <option value="third-party">3rd Party (+16)</option>
                 </select>
               </div>
 
-              <div className="form-group flex-1">
-                <label>Booking Lead Time (Days):</label>
+              <div className="form-field flex-1">
+                <label>Lead Time (Days):</label>
                 <input
                   type="number"
                   value={bookingLeadTimeDays}
@@ -152,8 +149,8 @@ export const NewBookingModal: React.FC<NewBookingModalProps> = ({ isOpen, onClos
               </div>
             </div>
 
-            <div className="form-row">
-              <div className="form-group flex-1">
+            <div className="flex-row">
+              <div className="form-field flex-1">
                 <label>Day of Week:</label>
                 <select value={dayOfWeek} onChange={e => setDayOfWeek(e.target.value)}>
                   <option value="Tuesday">Tuesday</option>
@@ -164,7 +161,7 @@ export const NewBookingModal: React.FC<NewBookingModalProps> = ({ isOpen, onClos
                 </select>
               </div>
 
-              <div className="form-group flex-1">
+              <div className="form-field flex-1">
                 <label>Time Slot:</label>
                 <input
                   type="text"
@@ -175,10 +172,12 @@ export const NewBookingModal: React.FC<NewBookingModalProps> = ({ isOpen, onClos
               </div>
             </div>
 
-            <div className="form-section-title mt-3">Client Past History Signals</div>
-            <div className="form-row">
-              <div className="form-group flex-1">
-                <label>Total Past Visits:</label>
+            <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--accent-blue)', marginTop: '0.5rem', marginBottom: '0.35rem' }}>
+              Past Client History
+            </div>
+            <div className="flex-row">
+              <div className="form-field flex-1">
+                <label>Visits:</label>
                 <input
                   type="number"
                   value={totalVisits}
@@ -186,8 +185,8 @@ export const NewBookingModal: React.FC<NewBookingModalProps> = ({ isOpen, onClos
                   min={0}
                 />
               </div>
-              <div className="form-group flex-1">
-                <label>Past No-Shows:</label>
+              <div className="form-field flex-1">
+                <label>No-Shows:</label>
                 <input
                   type="number"
                   value={pastNoShows}
@@ -195,8 +194,8 @@ export const NewBookingModal: React.FC<NewBookingModalProps> = ({ isOpen, onClos
                   min={0}
                 />
               </div>
-              <div className="form-group flex-1">
-                <label>Past Cancels:</label>
+              <div className="form-field flex-1">
+                <label>Cancels:</label>
                 <input
                   type="number"
                   value={pastCancellations}
@@ -207,41 +206,31 @@ export const NewBookingModal: React.FC<NewBookingModalProps> = ({ isOpen, onClos
             </div>
           </div>
 
-          {/* Real-time score calculator panel */}
-          <div className="form-right live-score-panel">
-            <div className="live-score-header">
-              <Sparkles size={16} /> Live Agent Risk Score
-            </div>
-            
-            <div className="live-score-main">
-              <span className={`live-score-num score-${liveScore.tier.toLowerCase()}`}>
-                {liveScore.score}
-              </span>
-              <span className="live-score-max">/100</span>
-              <div className={`risk-tier-badge tier-${liveScore.tier.toLowerCase()} mt-2`}>
-                {liveScore.tier === 'High' ? <AlertTriangle size={14} /> : <CheckCircle size={14} />}
-                {liveScore.tier} No-Show Risk
+          {/* Live Score Side Card */}
+          <div style={{ background: 'var(--bg-input)', padding: '0.85rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div>
+              <div style={{ fontSize: '0.725rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '0.5rem' }}>
+                Calculated Risk Score
+              </div>
+              
+              <div style={{ textAlign: 'center', background: 'rgba(0,0,0,0.2)', padding: '0.65rem', borderRadius: 'var(--radius-sm)' }}>
+                <div style={{ fontSize: '2rem', fontWeight: 700, color: liveScore.tier === 'High' ? 'var(--status-red)' : liveScore.tier === 'Medium' ? 'var(--status-amber)' : 'var(--status-green)' }}>
+                  {liveScore.score}
+                </div>
+                <div className={`risk-pill risk-${liveScore.tier.toLowerCase()}`} style={{ marginTop: '0.25rem' }}>
+                  {liveScore.tier === 'High' ? <AlertTriangle size={12} /> : <CheckCircle size={12} />}
+                  {liveScore.tier} Risk
+                </div>
+              </div>
+
+              <div style={{ marginTop: '0.75rem', fontSize: '0.725rem' }}>
+                <div style={{ fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.2rem' }}>Suggested Action:</div>
+                <div style={{ fontWeight: 700, color: 'var(--text-main)' }}>{liveScore.suggestedActionLabel}</div>
               </div>
             </div>
 
-            <div className="live-factors-box">
-              <div className="box-title">Top Contributing Risk Drivers:</div>
-              <ul>
-                {liveScore.factors.map((f, i) => (
-                  <li key={i} className={`factor-sm ${f.impact}`}>
-                    {f.title}: {f.description}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="live-rec-box">
-              <div className="rec-mini-title">Suggested Mitigation:</div>
-              <div className="rec-mini-action">{liveScore.suggestedActionLabel}</div>
-            </div>
-
-            <button type="submit" className="btn-primary w-full mt-4">
-              Save & Score Appointment
+            <button type="submit" className="btn-blue" style={{ width: '100%', justifyContent: 'center', marginTop: '0.75rem' }}>
+              Save Appointment
             </button>
           </div>
         </form>

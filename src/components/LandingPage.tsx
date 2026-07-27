@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, ShieldCheck, Zap, ArrowRight, TrendingUp, Bot } from 'lucide-react';
+import { ShieldCheck, ArrowRight, TrendingUp, MessageSquare } from 'lucide-react';
 import { scoreAppointment } from '../lib/scoringEngine';
 import type { Appointment } from '../types';
 
@@ -44,151 +44,123 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchPlatform }) =>
   const annualSavedWithCopilot = Math.round(monthlyRevenueLost * 12 * 0.75);
 
   return (
-    <div className="landing-container">
-      <header className="landing-header">
-        <div className="flex items-center gap-2">
-          <div className="sidebar-brand-icon">
-            <Sparkles size={20} />
-          </div>
-          <span className="font-bold text-lg">Front Desk Copilot</span>
+    <div className="landing-shell">
+      <header className="landing-nav">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600 }}>
+          <div className="brand-dot" /> Front Desk Copilot
         </div>
-        <div className="flex items-center gap-3">
-          <button className="btn-obsidian" onClick={onLaunchPlatform}>
-            Demo Features
-          </button>
-          <button className="btn-electric" onClick={onLaunchPlatform}>
-            Launch Workspace <ArrowRight size={15} />
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button className="btn-ghost" onClick={onLaunchPlatform}>View Demo</button>
+          <button className="btn-blue" onClick={onLaunchPlatform}>
+            Open Platform <ArrowRight size={14} />
           </button>
         </div>
       </header>
 
-      <section className="landing-hero">
+      <section className="landing-hero-section">
         <div>
-          <div className="hero-pill">
-            <Zap size={14} /> AI Operations Assistant for Salons & Spas
-          </div>
-          <h1 className="hero-title">
-            Stop No-Shows & Expiry Penalties with <span className="gradient-text-blue">Front Desk Copilot</span>
+          <h1 className="hero-heading">
+            Intelligent Front Desk Operations for Salons & Spas
           </h1>
-          <p className="hero-sub">
-            The single-agent intelligence engine that predicts high-risk bookings, automates deposit requests, and audits state board license compliance—in real time.
+          <p className="hero-description">
+            Predict high-risk booking no-shows, automate deposit reminders, and maintain staff cosmetology license compliance in one effortless platform.
           </p>
-          <div className="hero-cta-group">
-            <button className="btn-electric" style={{ padding: '0.8rem 1.75rem', fontSize: '1rem' }} onClick={onLaunchPlatform}>
-              Open Live Platform <ArrowRight size={18} />
-            </button>
-          </div>
+          <button className="btn-blue" style={{ padding: '0.6rem 1.25rem', fontSize: '0.875rem' }} onClick={onLaunchPlatform}>
+            Open Workspace <ArrowRight size={15} />
+          </button>
         </div>
 
-        <div className="hero-preview-card">
-          <div className="flex justify-between items-center mb-3">
-            <span className="text-xs font-bold text-electric uppercase tracking-wider flex items-center gap-1">
-              <Sparkles size={14} /> Live Heuristic Predictor Demo
+        <div className="clean-card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--accent-blue)' }}>
+              Live Predictor Scoring
             </span>
-            <span className={`risk-tier-badge tier-${demoScore.tier.toLowerCase()}`}>
+            <span className={`risk-pill risk-${demoScore.tier.toLowerCase()}`}>
               {demoScore.tier} Risk ({demoScore.score}/100)
             </span>
           </div>
 
-          <div className="text-sm font-bold mb-1">Interactive Signal Adjustment:</div>
-          <div className="form-stacked text-xs gap-2 mb-4">
-            <div>
-              <label className="text-secondary">Lead Time (Days): {demoLeadTime}d</label>
-              <input
-                type="range"
-                min="1"
-                max="30"
-                value={demoLeadTime}
-                onChange={e => setDemoLeadTime(Number(e.target.value))}
-                className="w-full"
-              />
-            </div>
-
-            <div>
-              <label className="text-secondary">Past No-Shows on Record: {demoNoShows}</label>
-              <input
-                type="range"
-                min="0"
-                max="3"
-                value={demoNoShows}
-                onChange={e => setDemoNoShows(Number(e.target.value))}
-                className="w-full"
-              />
-            </div>
-
-            <div className="flex gap-2 mt-1">
-              <button
-                className={`filter-chip ${demoChannel === 'walk-in' ? 'active' : ''}`}
-                onClick={() => setDemoChannel('walk-in')}
-              >
-                Walk-In (-10)
-              </button>
-              <button
-                className={`filter-chip ${demoChannel === 'phone' ? 'active' : ''}`}
-                onClick={() => setDemoChannel('phone')}
-              >
-                Phone (0)
-              </button>
-              <button
-                className={`filter-chip ${demoChannel === 'third-party' ? 'active' : ''}`}
-                onClick={() => setDemoChannel('third-party')}
-              >
-                3rd Party (+16)
-              </button>
-            </div>
+          <div className="form-field">
+            <label>Booking Lead Time: {demoLeadTime} days</label>
+            <input
+              type="range"
+              min="1"
+              max="30"
+              value={demoLeadTime}
+              onChange={e => setDemoLeadTime(Number(e.target.value))}
+            />
           </div>
 
-          <div className="obsidian-card p-3 text-xs">
-            <div className="font-bold text-electric mb-1">Copilot Action Recommendation:</div>
-            <div className="font-extrabold text-sm">{demoScore.suggestedActionLabel}</div>
-            <div className="text-tertiary mt-1">{demoScore.suggestedActionDescription}</div>
+          <div className="form-field">
+            <label>Past Client No-Shows: {demoNoShows}</label>
+            <input
+              type="range"
+              min="0"
+              max="3"
+              value={demoNoShows}
+              onChange={e => setDemoNoShows(Number(e.target.value))}
+            />
+          </div>
+
+          <div style={{ display: 'flex', gap: '0.3rem', marginTop: '0.5rem', marginBottom: '0.85rem' }}>
+            <button
+              className={`weather-chip ${demoChannel === 'walk-in' ? 'active' : ''}`}
+              onClick={() => setDemoChannel('walk-in')}
+            >
+              Walk-In
+            </button>
+            <button
+              className={`weather-chip ${demoChannel === 'phone' ? 'active' : ''}`}
+              onClick={() => setDemoChannel('phone')}
+            >
+              Phone
+            </button>
+            <button
+              className={`weather-chip ${demoChannel === 'third-party' ? 'active' : ''}`}
+              onClick={() => setDemoChannel('third-party')}
+            >
+              3rd Party App
+            </button>
+          </div>
+
+          <div style={{ background: 'var(--bg-input)', padding: '0.65rem', borderRadius: 'var(--radius-sm)', fontSize: '0.775rem' }}>
+            <div style={{ color: 'var(--accent-blue)', fontWeight: 600, marginBottom: '0.2rem' }}>Recommended Action:</div>
+            <div style={{ fontWeight: 700 }}>{demoScore.suggestedActionLabel}</div>
           </div>
         </div>
       </section>
 
-      <section className="feature-grid">
-        <div className="feature-card">
-          <div className="feature-icon">
-            <TrendingUp size={24} />
-          </div>
-          <h3 className="feature-title">No-Show Risk Predictor</h3>
-          <p className="feature-desc">
-            Evaluates lead-times, past attendance ratios, weekend peak hours, and weather forecasts to assign actionable risk scores to every upcoming appointment.
-          </p>
+      <section style={{ maxWidth: '1100px', margin: '1rem auto 3rem auto', padding: '0 1.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+        <div className="clean-card">
+          <TrendingUp size={20} className="text-blue" style={{ marginBottom: '0.5rem' }} />
+          <div className="card-title">No-Show Predictor</div>
+          <div className="card-sub">Evaluates appointment lead times, client history, time of day, and weather forecast signals.</div>
         </div>
 
-        <div className="feature-card">
-          <div className="feature-icon">
-            <ShieldCheck size={24} />
-          </div>
-          <h3 className="feature-title">Compliance Hub</h3>
-          <p className="feature-desc">
-            Proactively audits cosmetology license renewal dates, specialty certificates, and sanitation inspection logs before state board audits occur.
-          </p>
+        <div className="clean-card">
+          <ShieldCheck size={20} className="text-blue" style={{ marginBottom: '0.5rem' }} />
+          <div className="card-title">Compliance Hub</div>
+          <div className="card-sub">Proactively tracks staff cosmetology licenses, specialty certificates, and sanitation audits.</div>
         </div>
 
-        <div className="feature-card">
-          <div className="feature-icon">
-            <Bot size={24} />
-          </div>
-          <h3 className="feature-title">Shared Agent Copilot</h3>
-          <p className="feature-desc">
-            Single natural language assistant connected to shared salon tables. Instantly answers questions, analyzes individual risks, and drafts communications.
-          </p>
+        <div className="clean-card">
+          <MessageSquare size={20} className="text-blue" style={{ marginBottom: '0.5rem' }} />
+          <div className="card-title">Copilot Assistant</div>
+          <div className="card-sub">Natural language assistant that analyzes risk drivers and drafts client communications in 1 click.</div>
         </div>
       </section>
 
-      <section className="max-w-5xl mx-auto px-6 py-12">
-        <div className="obsidian-card p-8 border-accent">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-extrabold mb-2">Estimate Your Salon's Revenue Recovery</h2>
-            <p className="text-secondary text-sm">See how much lost no-show revenue Front Desk Copilot recovers annually.</p>
+      <section style={{ maxWidth: '1100px', margin: '0 auto 4rem auto', padding: '0 1.5rem' }}>
+        <div className="clean-card" style={{ padding: '1.75rem' }}>
+          <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+            <div className="card-title" style={{ fontSize: '1.1rem' }}>Revenue Recovery Estimator</div>
+            <div className="card-sub">Calculate lost appointment revenue recovered annually.</div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
-            <div className="space-y-4 text-xs">
-              <div>
-                <label className="font-bold text-secondary">Monthly Appointments: {monthlyBookings}</label>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.5rem', alignItems: 'center' }}>
+            <div>
+              <div className="form-field">
+                <label>Monthly Appointments: {monthlyBookings}</label>
                 <input
                   type="range"
                   min="50"
@@ -196,12 +168,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchPlatform }) =>
                   step="10"
                   value={monthlyBookings}
                   onChange={e => setMonthlyBookings(Number(e.target.value))}
-                  className="w-full"
                 />
               </div>
 
-              <div>
-                <label className="font-bold text-secondary">Avg Service Ticket ($): ${avgTicketPrice}</label>
+              <div className="form-field">
+                <label>Avg Ticket Price ($): ${avgTicketPrice}</label>
                 <input
                   type="range"
                   min="40"
@@ -209,38 +180,31 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLaunchPlatform }) =>
                   step="5"
                   value={avgTicketPrice}
                   onChange={e => setAvgTicketPrice(Number(e.target.value))}
-                  className="w-full"
                 />
               </div>
 
-              <div>
-                <label className="font-bold text-secondary">Current No-Show Rate: {noShowRate}%</label>
+              <div className="form-field">
+                <label>Current No-Show Rate: {noShowRate}%</label>
                 <input
                   type="range"
                   min="2"
                   max="25"
                   value={noShowRate}
                   onChange={e => setNoShowRate(Number(e.target.value))}
-                  className="w-full"
                 />
               </div>
             </div>
 
-            <div className="col-span-2 obsidian-card bg-surface p-6 text-center border-accent">
-              <div className="text-xs font-bold text-tertiary uppercase tracking-wider">Estimated Annual Revenue Saved</div>
-              <div className="text-4xl font-extrabold text-electric my-2">${annualSavedWithCopilot.toLocaleString()}</div>
-              <div className="text-xs text-secondary mb-4">Based on 75% reduction in empty-slot no-shows via automated deposit requests & SMS confirmations.</div>
-              <button className="btn-electric w-full justify-center" onClick={onLaunchPlatform}>
-                Start Saving Revenue Today
+            <div style={{ background: 'var(--bg-input)', padding: '1.25rem', borderRadius: 'var(--radius-md)', textAlign: 'center', border: '1px solid var(--border-blue)' }}>
+              <div style={{ fontSize: '0.725rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>Estimated Annual Revenue Recovered</div>
+              <div style={{ fontSize: '2.25rem', fontWeight: 700, color: 'var(--accent-blue)', margin: '0.5rem 0' }}>${annualSavedWithCopilot.toLocaleString()}</div>
+              <button className="btn-blue" style={{ width: '100%', justifyContent: 'center' }} onClick={onLaunchPlatform}>
+                Open Platform Workspace
               </button>
             </div>
           </div>
         </div>
       </section>
-
-      <footer className="text-center py-8 text-xs text-tertiary border-t border-subtle mt-12">
-        Front Desk Copilot • Obsidian Web Platform • Built with React & TypeScript
-      </footer>
     </div>
   );
 };

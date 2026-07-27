@@ -6,7 +6,6 @@ export const ClientDirectoryView: React.FC = () => {
   const { appointments, scoredAppointments } = useSalon();
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Extract unique clients
   const clientMap = new Map();
   appointments.forEach(apt => {
     if (!clientMap.has(apt.clientName)) {
@@ -29,37 +28,35 @@ export const ClientDirectoryView: React.FC = () => {
   );
 
   return (
-    <div className="obsidian-card">
-      <div className="flex justify-between items-center mb-4 flex-wrap gap-3">
+    <div className="clean-card">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
         <div>
-          <h2 className="text-xl font-extrabold flex items-center gap-2">
-            <Users className="text-electric" size={20} /> Client Attendance Directory
-          </h2>
-          <p className="text-xs text-secondary mt-1">
-            Historical attendance records, no-show ratios, and booking channel habits.
-          </p>
+          <div className="card-title" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            <Users size={16} className="text-blue" /> Client Records & Attendance History
+          </div>
+          <div className="card-sub">Client attendance ratios and booking channel habits.</div>
         </div>
 
-        <div className="flex items-center gap-2 bg-input px-3 py-1.5 rounded border border-subtle">
-          <Search size={14} className="text-tertiary" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'var(--bg-input)', padding: '0.35rem 0.65rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
+          <Search size={13} style={{ color: 'var(--text-dim)' }} />
           <input
             type="text"
-            placeholder="Search client..."
+            placeholder="Filter client..."
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            className="bg-transparent border-none text-xs text-primary focus:outline-none"
+            style={{ background: 'transparent', border: 'none', fontSize: '0.775rem', color: 'var(--text-main)', outline: 'none' }}
           />
         </div>
       </div>
 
-      <table className="directory-table">
+      <table className="clean-table">
         <thead>
           <tr>
             <th>Client Name</th>
             <th>Contact</th>
             <th>Total Visits</th>
             <th>No-Shows / Cancels</th>
-            <th>Booking Channel</th>
+            <th>Channel</th>
             <th>Current Risk Score</th>
           </tr>
         </thead>
@@ -68,18 +65,18 @@ export const ClientDirectoryView: React.FC = () => {
             const noShowRate = c.history.totalVisits > 0 ? Math.round((c.history.pastNoShows / c.history.totalVisits) * 100) : 0;
             return (
               <tr key={i}>
-                <td className="font-bold text-primary">{c.name}</td>
+                <td style={{ fontWeight: 600, color: 'var(--text-main)' }}>{c.name}</td>
                 <td>{c.phone}</td>
-                <td className="font-semibold">{c.history.totalVisits} visits</td>
+                <td style={{ fontWeight: 500 }}>{c.history.totalVisits} visits</td>
                 <td>
-                  <span className={c.history.pastNoShows > 0 ? 'text-danger font-bold' : ''}>
+                  <span className={c.history.pastNoShows > 0 ? 'text-red font-bold' : ''}>
                     {c.history.pastNoShows} no-shows ({noShowRate}%)
                   </span> / {c.history.pastCancellations} cancels
                 </td>
                 <td><span className={`channel-chip channel-${c.channel}`}>{c.channel}</span></td>
                 <td>
-                  <span className={`risk-tier-badge tier-${c.riskTier.toLowerCase()}`}>
-                    {c.riskTier === 'High' ? <AlertTriangle size={12} /> : <CheckCircle size={12} />}
+                  <span className={`risk-pill risk-${c.riskTier.toLowerCase()}`}>
+                    {c.riskTier === 'High' ? <AlertTriangle size={11} /> : <CheckCircle size={11} />}
                     {c.riskScore}/100 ({c.riskTier})
                   </span>
                 </td>
