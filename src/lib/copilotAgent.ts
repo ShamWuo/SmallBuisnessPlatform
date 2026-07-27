@@ -211,11 +211,80 @@ export function handleCopilotQuery(prompt: string, context: CopilotContext): Cha
     };
   }
 
+  // Query Intent 5: Demand Forecasting & Peak Hours
+  if (p.includes('demand') || p.includes('forecast') || p.includes('peak') || p.includes('busy') || p.includes('slow') || p.includes('staffing')) {
+    return {
+      id: msgId,
+      sender: 'copilot',
+      text: `📊 **AI Demand Forecast Analysis**:\n\n` +
+        `• **Peak Demand Slots**: Friday (2 PM - 5 PM) & Saturday (10 AM - 3 PM) forecasted at **85%-98% capacity**.\n` +
+        `• **Off-Peak Opportunities**: Tuesday (9 AM - 12 PM) is currently at **35% demand**.\n` +
+        `• **Staffing Recommendation**: Recommend adding 1 temporary stylist on Friday 2pm shift to avoid 25-min booking bottlenecks.\n\n` +
+        `💡 *Tip: You can launch an automated AI Off-Peak Campaign to fill Tuesday morning slots.*`,
+      timestamp,
+      toolCallName: 'analyze_demand_forecast()',
+      actionCard: {
+        type: 'demand_alert',
+        title: '7-Day Demand Forecast Highlights',
+        payload: { peakDay: 'Friday (2 PM - 5 PM)', offPeakDay: 'Tuesday (9 AM - 12 PM)', recommendedAction: 'Launch Off-Peak Filler Campaign' }
+      }
+    };
+  }
+
+  // Query Intent 6: Customer Insights, LTV & At-Risk Churn
+  if (p.includes('customer') || p.includes('ltv') || p.includes('churn') || p.includes('at-risk') || p.includes('vip') || p.includes('segment')) {
+    return {
+      id: msgId,
+      sender: 'copilot',
+      text: `👥 **Customer Intelligence Summary**:\n\n` +
+        `• **Total Tracked Clients**: 6 active profiles\n` +
+        `• **Average 12-Month LTV**: **$2,016 / client**\n` +
+        `• **At-Risk Churn Watchlist**: **2 clients** (Jessica Miller & David Chen) with >75 days since last visit.\n` +
+        `• **Revenue at Risk**: **$4,400 in potential lost annual spend**.\n\n` +
+        `💡 *Recommendation: Send a 1-click At-Risk Win-Back campaign with a $30 keratin treatment voucher.*`,
+      timestamp,
+      toolCallName: 'get_customer_insights()',
+      actionCard: {
+        type: 'general_summary',
+        title: 'At-Risk Churn Alert ($4,400 Exposure)',
+        payload: [
+          { name: 'Jessica Miller', daysAbsent: 77, predictedLTV: '$2,400', churnScore: '78%' },
+          { name: 'David Chen', daysAbsent: 99, predictedLTV: '$2,000', churnScore: '85%' }
+        ]
+      }
+    };
+  }
+
+  // Query Intent 7: Marketing Automation
+  if (p.includes('marketing') || p.includes('campaign') || p.includes('promo') || p.includes('fill') || p.includes('discount')) {
+    return {
+      id: msgId,
+      sender: 'copilot',
+      text: `📢 **AI Marketing Campaign Generator**:\n\n` +
+        `I've prepared a draft **Off-Peak Tuesday Morning Fill-Up Campaign** targeting clients who haven't booked in the last 30 days:\n\n` +
+        `*"✨ Luxe & Glow Flash Perk: Book any haircut or facial this Tuesday morning between 9am-12pm & enjoy 20% OFF! Reply YES to claim your spot."*\n\n` +
+        `📈 **Projected Revenue Recovery**: +$1,680 across 14 converted bookings.`,
+      timestamp,
+      toolCallName: 'generate_ai_campaign()',
+      actionCard: {
+        type: 'marketing_draft',
+        title: 'Draft Campaign: Tuesday Off-Peak Filler',
+        payload: {
+          title: 'Tuesday Morning 20% OFF Flash Push',
+          target: 'All Active Clients (84 recipients)',
+          estRevenue: '$1,680',
+          cost: '$12'
+        }
+      }
+    };
+  }
+
   // Default Copilot response
   return {
     id: msgId,
     sender: 'copilot',
-    text: `Hello! I'm your **Front Desk Copilot**. I analyze appointment no-show risks in real-time and audit staff & facility compliance.\n\nHere are quick actions you can ask me:\n• *"Which appointments have high no-show risk today?"*\n• *"Why is Jessica Miller's appointment high risk?"*\n• *"Are we compliant right now?"*\n• *"Draft a deposit request for the highest risk appointment."*`,
+    text: `Hello! I'm your **Enterprise Front Desk Copilot**. I bring big-chain AI intelligence to Luxe & Glow Salon.\n\nHere are quick queries you can run:\n• *"Show me the demand forecast and peak hours for this week."*\n• *"Which clients are at risk of churning and what is their LTV?"*\n• *"Generate an AI marketing campaign for slow Tuesday slots."*\n• *"Which appointments have high no-show risk today?"*\n• *"Are all staff cosmetology licenses compliant?"*`,
     timestamp
   };
 }
+

@@ -6,11 +6,36 @@ import type {
   ActionModalState,
   ChatMessage,
   RiskScoreResult,
-  ComplianceSummary
+  ComplianceSummary,
+  DayDemandForecast,
+  StaffingRecommendation,
+  SupplyRequirement,
+  CustomerProfile,
+  CustomerInsightsSummary,
+  MarketingCampaign,
+  AutomatedTriggerRule,
+  CampaignType,
+  CustomerSegmentType
 } from '../types';
 import { scoreAppointment } from '../lib/scoringEngine';
 import { calculateComplianceSummary } from '../lib/complianceEngine';
 import { handleCopilotQuery, toolDraftReminder } from '../lib/copilotAgent';
+import {
+  generate7DayDemandForecast,
+  generateStaffingRecommendations,
+  generateSupplyRequirements
+} from '../lib/demandForecastEngine';
+import { INITIAL_CUSTOMERS, computeCustomerInsights } from '../lib/customerInsightsEngine';
+import { INITIAL_CAMPAIGNS, INITIAL_TRIGGERS, createCampaignDraft } from '../lib/marketingEngine';
+import {
+  fetchAppointmentsFromAPI,
+  createAppointmentAPI,
+  fetchStaffFromAPI,
+  fetchCustomersFromAPI,
+  fetchCampaignsFromAPI,
+  createCampaignAPI,
+  sendCopilotAIQueryAPI
+} from '../lib/apiClient';
 import {
   fetchAppointmentsApi,
   createAppointmentApi,
@@ -37,6 +62,16 @@ interface SalonContextType {
   addAppointment: (apt: Omit<Appointment, 'id' | 'clientHistory'> & { totalVisits?: number; pastNoShows?: number; pastCancellations?: number }) => void;
   triggerDraftAction: (category: 'appointment' | 'compliance', id: string) => void;
   addComplianceItem: (item: { staffId?: string; title: string; category: any; expiryDate: string; licenseNumber?: string }) => void;
+  demandForecast: DayDemandForecast[];
+  staffingRecommendations: StaffingRecommendation[];
+  supplyRequirements: SupplyRequirement[];
+  customers: CustomerProfile[];
+  customerInsights: CustomerInsightsSummary;
+  campaigns: MarketingCampaign[];
+  triggerRules: AutomatedTriggerRule[];
+  addCampaign: (campaignData: Omit<MarketingCampaign, 'id' | 'createdAt' | 'recipientsCount' | 'conversionsCount' | 'conversionRatePct' | 'revenueGenerated' | 'campaignCost' | 'roiMultiplier'>) => void;
+  toggleTriggerRule: (triggerId: string) => void;
+  launchQuickCampaign: (type: CampaignType, targetSegment: CustomerSegmentType | 'All', offer: string, timeSlot?: string) => void;
 }
 
 const initialAppointments: Appointment[] = [
@@ -251,11 +286,7 @@ const initialChatMessages: ChatMessage[] = [
   {
     id: 'msg-init',
     sender: 'copilot',
-    text: `👋 Welcome to **Front Desk Copilot**! I'm monitoring **Luxe & Glow Salon & Spa**.
-
-I've identified **3 high-risk appointments** today and **2 urgent compliance items** (including Chloe Bennett's expired Cosmetology license).
-
-How can I assist you right now?`,
+    text: `👋 Welcome to **Enterprise Front Desk Copilot**! Connected to **Real Express & SQLite Database**.\n\n⚡ **Active Intelligence Summary**:\n• **Demand Forecast**: Friday 2-5 PM peak demand (95%). Tuesday morning slow window (35% demand).\n• **Customer Insights**: 2 high-value clients at risk of churning ($4,400 exposure).\n• **No-Show Predictor**: 3 appointments flagged high-risk.\n• **Compliance**: 2 urgent license & safety renewals.\n\nHow can I help boost salon revenue today?`,
     timestamp: '09:00 AM'
   }
 ];
@@ -269,6 +300,36 @@ export const SalonProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [weatherSim, setWeatherSim] = useState<'Clear' | 'Rain' | 'Thunderstorm'>('Clear');
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>(initialChatMessages);
   const [isBackendConnected, setIsBackendConnected] = useState<boolean>(false);
+  const [customers, setCustomers] = useState<CustomerProfile[]>(INITIAL_CUSTOMERS);
+  const [campaigns, setCampaigns] = useState<MarketingCampaign[]>(INITIAL_CAMPAIGNS);
+  const [triggerRules, setTriggerRules] = useState<AutomatedTriggerRule[]>(INITIAL_TRIGGERS);
+
+  // Sync data with Express API on mount
+  useEffect(() => {
+    let isMounted = true;
+    async function syncBackendData() {
+      const isOnline = await checkBackendHealth();
+      if (isMounted) setIsBackendConnected(isOnline);
+
+      const apiApts = await fetchAppointmentsFromAPI() || await fetchAppointmentsApi();
+      if (apiApts && apiApts.length > 0 && isMounted) setAppointments(apiApts);
+
+      const apiStaff = await fetchStaffFromAPI();
+      if (apiStaff && apiStaff.length > 0 && isMounted) setStaffList(apiStaff);
+
+      const fetchedComp = await fetchComplianceApi();
+      if (fetchedComp && isMounted) {
+        if (fetchedComp.healthLogs) setHealthLogs(fetchedComp.healthLogs);
+      }
+
+      const apiCust = await fetchCustomersFromAPI();
+      if (apiCust && apiCust.length > 0 && isMounted) setCustomers(apiCust);
+
+      const apiCmp = await fetchCampaignsFromAPI();
+      if (apiCmp && apiCmp.length > 0 && isMounted) setCampaigns(apiCmp);
+    }
+    syncBackendData();
+  }, []);
 
   const [actionModal, setActionModal] = useState<ActionModalState>({
     isOpen: false,
@@ -277,27 +338,6 @@ export const SalonProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     recipient: '',
     messageContent: ''
   });
-
-  // Initial Sync from Backend API
-  useEffect(() => {
-    let isMounted = true;
-    async function loadBackendData() {
-      const isOnline = await checkBackendHealth();
-      if (isMounted) setIsBackendConnected(isOnline);
-      if (isOnline) {
-        const fetchedApts = await fetchAppointmentsApi();
-        if (fetchedApts && isMounted) {
-          setAppointments(fetchedApts);
-        }
-        const fetchedComp = await fetchComplianceApi();
-        if (fetchedComp && isMounted) {
-          setStaffList(fetchedComp.staffList);
-          setHealthLogs(fetchedComp.healthLogs);
-        }
-      }
-    }
-    loadBackendData();
-  }, []);
 
   const scoredAppointments = useMemo(() => {
     return appointments.map(apt => {
@@ -312,6 +352,22 @@ export const SalonProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const complianceSummary = useMemo(() => {
     return calculateComplianceSummary(staffList, healthLogs);
   }, [staffList, healthLogs]);
+
+  const demandForecast = useMemo(() => {
+    return generate7DayDemandForecast(appointments, weatherSim);
+  }, [appointments, weatherSim]);
+
+  const staffingRecommendations = useMemo(() => {
+    return generateStaffingRecommendations(demandForecast);
+  }, [demandForecast]);
+
+  const supplyRequirements = useMemo(() => {
+    return generateSupplyRequirements(appointments);
+  }, [appointments]);
+
+  const customerInsights = useMemo(() => {
+    return computeCustomerInsights(customers, appointments);
+  }, [customers, appointments]);
 
   const openActionModal = (modalData: Omit<ActionModalState, 'isOpen'>) => {
     setActionModal({ ...modalData, isOpen: true });
@@ -332,7 +388,7 @@ export const SalonProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
   };
 
-  const sendCopilotMessage = (prompt: string) => {
+  const sendCopilotMessage = async (prompt: string) => {
     const userMsg: ChatMessage = {
       id: `msg-user-${Date.now()}`,
       sender: 'user',
@@ -342,10 +398,20 @@ export const SalonProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     setChatMessages(prev => [...prev, userMsg]);
 
-    setTimeout(() => {
+    const apiResult = await sendCopilotAIQueryAPI(prompt);
+    if (apiResult && apiResult.success && apiResult.aiResponseText) {
+      const aiResponseMsg: ChatMessage = {
+        id: `msg-ai-${Date.now()}`,
+        sender: 'copilot',
+        text: apiResult.aiResponseText,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        toolCallName: 'gemini_agent_platform()'
+      };
+      setChatMessages(prev => [...prev, aiResponseMsg]);
+    } else {
       const copilotResponse = handleCopilotQuery(prompt, { appointments, staffList, healthLogs });
       setChatMessages(prev => [...prev, copilotResponse]);
-    }, 400);
+    }
   };
 
   const addAppointment = async (newAptData: Omit<Appointment, 'id' | 'clientHistory'> & { totalVisits?: number; pastNoShows?: number; pastCancellations?: number }) => {
@@ -377,6 +443,7 @@ export const SalonProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     setAppointments(prev => [newApt, ...prev]);
+    createAppointmentAPI(newApt);
   };
 
   const addComplianceItem = async (itemData: { staffId?: string; title: string; category: any; expiryDate: string; licenseNumber?: string }) => {
@@ -421,6 +488,41 @@ export const SalonProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+  const addCampaign = (campaignData: Omit<MarketingCampaign, 'id' | 'createdAt' | 'recipientsCount' | 'conversionsCount' | 'conversionRatePct' | 'revenueGenerated' | 'campaignCost' | 'roiMultiplier'>) => {
+    const recipients = campaignData.targetSegment === 'At-Risk' ? 42 : campaignData.targetSegment === 'VIP Champions' ? 35 : 120;
+    const estConversions = Math.round(recipients * 0.18);
+    const estRev = estConversions * 110;
+    const cost = 15;
+
+    const newCampaign: MarketingCampaign = {
+      ...campaignData,
+      id: `CMP-${Date.now()}`,
+      recipientsCount: recipients,
+      conversionsCount: estConversions,
+      conversionRatePct: 18.0,
+      revenueGenerated: estRev,
+      campaignCost: cost,
+      roiMultiplier: Math.round(estRev / cost),
+      createdAt: new Date().toISOString().split('T')[0]
+    };
+
+    setCampaigns(prev => [newCampaign, ...prev]);
+    createCampaignAPI(newCampaign);
+  };
+
+  const toggleTriggerRule = (triggerId: string) => {
+    setTriggerRules(prev => prev.map(t => t.id === triggerId ? { ...t, isEnabled: !t.isEnabled } : t));
+  };
+
+  const launchQuickCampaign = (type: CampaignType, targetSegment: CustomerSegmentType | 'All', offer: string, timeSlot?: string) => {
+    const draft = createCampaignDraft(type, targetSegment, offer, timeSlot);
+    draft.status = 'Active';
+    draft.conversionsCount = Math.round(draft.recipientsCount * 0.16);
+    draft.revenueGenerated = draft.conversionsCount * 120;
+    draft.roiMultiplier = Math.round(draft.revenueGenerated / draft.campaignCost);
+    setCampaigns(prev => [draft, ...prev]);
+  };
+
   return (
     <SalonContext.Provider
       value={{
@@ -439,7 +541,17 @@ export const SalonProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         sendCopilotMessage,
         addAppointment,
         triggerDraftAction,
-        addComplianceItem
+        addComplianceItem,
+        demandForecast,
+        staffingRecommendations,
+        supplyRequirements,
+        customers,
+        customerInsights,
+        campaigns,
+        triggerRules,
+        addCampaign,
+        toggleTriggerRule,
+        launchQuickCampaign
       }}
     >
       {children}
