@@ -65,7 +65,7 @@ const initialAppointments: Appointment[] = [
     clientName: 'Marcus Vance',
     clientPhone: '(555) 876-5432',
     clientEmail: 'marcus.vance@example.com',
-    serviceName: 'Men’s Executive Haircut & Beard Sculpt',
+    serviceName: "Men's Executive Haircut & Beard Sculpt",
     servicePrice: 65,
     serviceDurationMin: 45,
     appointmentDate: '2026-07-27',
