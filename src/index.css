@@ -151,6 +151,9 @@ body {
 
 .menu-badge.badge-blue { background: rgba(56, 189, 248, 0.15); color: var(--accent-blue); }
 .menu-badge.badge-red { background: var(--status-red-bg); color: var(--status-red); }
+.menu-badge.badge-purple { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+.menu-badge.badge-green { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
+
 
 .sidebar-foot {
   padding: 0.75rem 0.85rem;

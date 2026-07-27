@@ -7,10 +7,28 @@ import {
   MessageSquare,
   Users,
   Sliders,
-  Globe
+  Globe,
+  TrendingUp,
+  Sparkles,
+  Megaphone,
+  DollarSign,
+  BarChart2,
+  Store
 } from 'lucide-react';
 
-export type PlatformTab = 'landing' | 'overview' | 'predictor' | 'compliance' | 'copilot' | 'clients' | 'settings';
+export type PlatformTab =
+  | 'landing'
+  | 'overview'
+  | 'demand'
+  | 'insights'
+  | 'marketing'
+  | 'pricing'
+  | 'benchmarks'
+  | 'predictor'
+  | 'compliance'
+  | 'copilot'
+  | 'clients'
+  | 'settings';
 
 interface SidebarProps {
   activeTab: PlatformTab;
@@ -18,10 +36,12 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
-  const { scoredAppointments, complianceSummary } = useSalon();
+  const { scoredAppointments, complianceSummary, customerInsights, campaigns } = useSalon();
 
   const highRiskCount = scoredAppointments.filter(s => s.result.tier === 'High').length;
   const expiredCount = complianceSummary.expiredCount;
+  const atRiskClientCount = customerInsights.totalAtRiskCount;
+  const activeCampaignsCount = campaigns.filter(c => c.status === 'Active').length;
 
   return (
     <aside className="compact-sidebar">
@@ -43,7 +63,45 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => 
           className={`menu-btn ${activeTab === 'overview' ? 'active' : ''}`}
           onClick={() => setActiveTab('overview')}
         >
-          <LayoutDashboard size={14} /> Overview
+          <LayoutDashboard size={14} /> Executive Hub
+        </button>
+
+        <div className="menu-label">Enterprise AI</div>
+        <button
+          className={`menu-btn ${activeTab === 'demand' ? 'active' : ''}`}
+          onClick={() => setActiveTab('demand')}
+        >
+          <TrendingUp size={14} /> Demand Forecast
+        </button>
+
+        <button
+          className={`menu-btn ${activeTab === 'insights' ? 'active' : ''}`}
+          onClick={() => setActiveTab('insights')}
+        >
+          <Sparkles size={14} /> Customer Insights
+          {atRiskClientCount > 0 && <span className="menu-badge badge-purple">{atRiskClientCount}</span>}
+        </button>
+
+        <button
+          className={`menu-btn ${activeTab === 'marketing' ? 'active' : ''}`}
+          onClick={() => setActiveTab('marketing')}
+        >
+          <Megaphone size={14} /> AI Marketing
+          {activeCampaignsCount > 0 && <span className="menu-badge badge-green">{activeCampaignsCount}</span>}
+        </button>
+
+        <button
+          className={`menu-btn ${activeTab === 'pricing' ? 'active' : ''}`}
+          onClick={() => setActiveTab('pricing')}
+        >
+          <DollarSign size={14} /> Dynamic Pricing
+        </button>
+
+        <button
+          className={`menu-btn ${activeTab === 'benchmarks' ? 'active' : ''}`}
+          onClick={() => setActiveTab('benchmarks')}
+        >
+          <BarChart2 size={14} /> Market Radar
         </button>
 
         <div className="menu-label">Operations</div>
@@ -87,9 +145,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => 
       </nav>
 
       <div className="sidebar-foot">
-        <div>Luxe & Glow Salon</div>
-        <div style={{ color: 'var(--text-dim)', fontSize: '0.675rem' }}>Front Desk Active</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontWeight: 600 }}>
+          <Store size={12} className="text-blue" /> Soho Flagship
+        </div>
+        <div style={{ color: 'var(--text-dim)', fontSize: '0.675rem' }}>Multi-Store Mode Active</div>
       </div>
     </aside>
   );
 };
+
+
